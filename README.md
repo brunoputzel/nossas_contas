@@ -16,8 +16,14 @@ O projeto será desenvolvido em **Flutter**, com o objetivo de ser multiplatafor
 
 ## Documentação da Arquitetura
 
-**
+### Diagrama de Pacotes (Arquitetura da Aplicação)
+![Diagrama de Pacotes](docs/diagramas/Diagrama%20de%20pacotes.png)
 
+### Diagrama de Arquitetura de Implantação
+![Diagrama de Implantação](docs/diagramas/Diagrama%20de%20Implantação.png)
+
+### Diagrama de Arquitetura DevOps
+![Diagrama de Arquitetura DevOps](docs/diagramas/Diagrama%20de%20Arquitetura%20DevOps.png)
 ---
 ### Autor
 * Bruno Sisterhenn Putzel
