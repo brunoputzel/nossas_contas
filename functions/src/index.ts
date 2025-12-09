@@ -11,9 +11,6 @@ const app = express();
 app.use(cors({origin: true}));
 app.use(express.json());
 
-/* ============================
-   TIPAGENS
-============================ */
 
 interface MembroGrupo {
   nome: string;
@@ -34,17 +31,11 @@ interface Transacao {
   categoria: string;
   createdAt: FirebaseFirestore.Timestamp;
 
-  // campos opcionais para grupos
   grupoId?: string;
   responsavelNome?: string;
   responsavelEmail?: string;
 }
 
-/* ============================
-   ROTAS DE TRANSACOES
-============================ */
-
-// GET /transacoes?grupoId=xxx&responsavelEmail=yyy
 app.get("/transacoes", async (req: Request, res: Response) => {
   try {
     const {grupoId, responsavelEmail} = req.query;
@@ -166,11 +157,7 @@ app.delete("/transacoes/:id", async (req: Request, res: Response) => {
   }
 });
 
-/* ============================
-   ROTAS DE GRUPOS
-============================ */
 
-// função utilitária para normalizar membros vindos do body
 function normalizarMembros(
   membros?: Array<{ nome?: string; email?: string }>,
 ): MembroGrupo[] {
@@ -185,7 +172,6 @@ function normalizarMembros(
   });
 }
 
-// POST /grupos (criar grupo)
 app.post("/grupos", async (req: Request, res: Response) => {
   try {
     const {nome, descricao, membros} = req.body as {
