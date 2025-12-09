@@ -73,7 +73,6 @@ app.get("/transacoes", async (req: Request, res: Response) => {
   }
 });
 
-// POST /transacoes
 app.post("/transacoes", async (req: Request, res: Response) => {
   try {
     const {
@@ -140,7 +139,7 @@ app.post("/transacoes", async (req: Request, res: Response) => {
   }
 });
 
-// DELETE /transacoes/:id
+
 app.delete("/transacoes/:id", async (req: Request, res: Response) => {
   try {
     const {id} = req.params;
@@ -204,7 +203,6 @@ app.post("/grupos", async (req: Request, res: Response) => {
   }
 });
 
-// GET /grupos (listar grupos)
 app.get("/grupos", async (_req: Request, res: Response) => {
   try {
     const snapshot = await db
@@ -224,7 +222,6 @@ app.get("/grupos", async (_req: Request, res: Response) => {
   }
 });
 
-// GET /grupos/:id (detalhe do grupo)
 app.get("/grupos/:id", async (req: Request, res: Response) => {
   try {
     const {id} = req.params;
@@ -241,7 +238,6 @@ app.get("/grupos/:id", async (req: Request, res: Response) => {
   }
 });
 
-// PUT /grupos/:id (editar grupo)
 app.put("/grupos/:id", async (req: Request, res: Response) => {
   try {
     const {id} = req.params;

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-// Base da API (reaproveitada em transações e grupos)
+
 const String _baseUrl =
     'https://us-central1-nossas-contas-app-c432d.cloudfunctions.net/api';
 
@@ -35,8 +35,8 @@ class _AddTransacaoTelaState extends State<AddTransacaoTela> {
   Map<String, double> _taxasDeCambio = {};
   String _statusCotacao = 'Buscando cotações...';
 
-  // CONTROLE DE GRUPO / INDIVIDUAL
-  String _tipoLancamento = 'individual'; // 'individual' ou 'grupo'
+
+  String _tipoLancamento = 'individual'; 
 
   List<Map<String, dynamic>> _grupos = [];
   Map<String, dynamic>? _grupoSelecionado;
@@ -125,7 +125,7 @@ class _AddTransacaoTelaState extends State<AddTransacaoTela> {
     _valorConvertidoController.text = valorFinal.toStringAsFixed(2);
   }
 
-  // CARREGAR GRUPOS DA API
+
   Future<void> _carregarGrupos() async {
     setState(() {
       _carregandoGrupos = true;
@@ -211,7 +211,7 @@ class _AddTransacaoTelaState extends State<AddTransacaoTela> {
       return;
     }
 
-    // se for grupo, validar grupo e membro
+
     if (_tipoLancamento == 'grupo') {
       if (_grupoSelecionado == null || _membroSelecionado == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -230,7 +230,7 @@ class _AddTransacaoTelaState extends State<AddTransacaoTela> {
       valorFinalEmBRL = valorDigitado * taxa;
     }
 
-    // monta o payload básico
+
     final Map<String, dynamic> novaTransacao = {
       'descricao': descricao,
       'valor':
@@ -239,7 +239,7 @@ class _AddTransacaoTelaState extends State<AddTransacaoTela> {
       'categoria': _categoriaSelecionada,
     };
 
-    // garante que grupoId e responsável vão como string
+
     if (_tipoLancamento == 'grupo' &&
         _grupoSelecionado != null &&
         _membroSelecionado != null) {
@@ -261,9 +261,6 @@ class _AddTransacaoTelaState extends State<AddTransacaoTela> {
     }
 
     final String apiUrl = '$_baseUrl/transacoes';
-
-    // debug opcional para você ver o payload indo para a API no console
-    // print('Enviando transação: ${jsonEncode(novaTransacao)}');
 
     try {
       final response = await http.post(
@@ -339,7 +336,6 @@ class _AddTransacaoTelaState extends State<AddTransacaoTela> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // tipo da transação (despesa / receita)
                         SegmentedButton<String>(
                           segments: const [
                             ButtonSegment(
@@ -360,7 +356,6 @@ class _AddTransacaoTelaState extends State<AddTransacaoTela> {
                         ),
                         const SizedBox(height: 24),
 
-                        // valor + moeda
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -462,7 +457,6 @@ class _AddTransacaoTelaState extends State<AddTransacaoTela> {
 
                         const SizedBox(height: 24),
 
-                        // BLOCO: INDIVIDUAL x GRUPO
                         const Text(
                           'Tipo de lançamento',
                           style: TextStyle(

@@ -1,4 +1,3 @@
-// lib/tela_historico.dart
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -22,7 +21,7 @@ class HistoricoTelaState extends State<HistoricoTela> {
   bool _carregando = true;
   String? _erro;
 
-  // Filtro por grupo
+
   List<Map<String, dynamic>> _grupos = [];
   String? _grupoFiltroId;
   bool _carregandoGrupos = false;
@@ -35,7 +34,6 @@ class HistoricoTelaState extends State<HistoricoTela> {
     _carregarGrupos();
   }
 
-  // para o MainNavigator conseguir forçar reload
   Future<void> reload() async {
     await _carregarTransacoes();
   }
@@ -61,7 +59,6 @@ class HistoricoTelaState extends State<HistoricoTela> {
             'valor': (map['valor'] as num?)?.toDouble() ?? 0.0,
             'tipo': map['tipo'] ?? 'Despesa',
             'categoria': map['categoria'] ?? '',
-            // importante: manter grupoId se vier da API
             'grupoId': map['grupoId'],
           };
         }).toList();

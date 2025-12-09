@@ -20,7 +20,6 @@ class _CriarGrupoTelaState extends State<CriarGrupoTela> {
   final TextEditingController _nomeGrupoController = TextEditingController();
   final TextEditingController _descricaoController = TextEditingController();
 
-  // Estrutura interna para cada membro
   final List<_MembroForm> _membros = [ _MembroForm() ];
 
   bool _salvando = false;
@@ -43,7 +42,7 @@ class _CriarGrupoTelaState extends State<CriarGrupoTela> {
   }
 
   void _removerMembro(int index) {
-    if (_membros.length == 1) return; // sempre deixa pelo menos 1 linha
+    if (_membros.length == 1) return; 
     setState(() {
       final m = _membros.removeAt(index);
       m.nomeController.dispose();
@@ -94,7 +93,7 @@ class _CriarGrupoTelaState extends State<CriarGrupoTela> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Grupo criado com sucesso.')),
         );
-        Navigator.of(context).pop(true); // volta indicando sucesso
+        Navigator.of(context).pop(true); 
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
