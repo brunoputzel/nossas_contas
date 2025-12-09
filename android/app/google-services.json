@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "311993576664",
+    "project_id": "nossas-contas-app-c432d",
+    "storage_bucket": "nossas-contas-app-c432d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:311993576664:android:ec0b946a839133f6b4fbad",
+        "android_client_info": {
+          "package_name": "com.example.nossas_contas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrMCuJBKrojKrcc-Ml3bprEQ6MdiUxxEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

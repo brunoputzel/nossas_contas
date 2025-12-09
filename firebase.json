@@ -1,4 +1,7 @@
 {
+  "functions": {
+    "source": "functions"
+  },
   "hosting": {
     "public": "build/web",
     "ignore": [
@@ -8,9 +11,36 @@
     ],
     "rewrites": [
       {
+        "source": "/api/**",
+        "function": "api"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
     ]
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "nossas-contas-app-c432d",
+          "appId": "1:311993576664:android:ec0b946a839133f6b4fbad",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "nossas-contas-app-c432d",
+          "configurations": {
+            "android": "1:311993576664:android:ec0b946a839133f6b4fbad",
+            "ios": "1:311993576664:ios:b706b40db568a071b4fbad",
+            "macos": "1:311993576664:ios:b706b40db568a071b4fbad",
+            "web": "1:311993576664:web:a9ffc2282a47fae9b4fbad",
+            "windows": "1:311993576664:web:7dc93c779f7f3e5ab4fbad"
+          }
+        }
+      }
+    }
   }
 }

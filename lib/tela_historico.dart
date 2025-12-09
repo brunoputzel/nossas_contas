@@ -1,129 +1,222 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Importa para a AppBar
+import 'package:fl_chart/fl_chart.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class HistoricoTela extends StatefulWidget {
-  final List<Map<String, dynamic>> todasTransacoes;
-  final Function(Map<String, dynamic>) onExcluir;
-
-  const HistoricoTela({
-    super.key,
-    required this.todasTransacoes,
-    required this.onExcluir,
-  });
+class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
 
   @override
-  State<HistoricoTela> createState() => _HistoricoTelaState();
+  State<DashboardScreen> createState() => DashboardScreenState();
 }
 
-class _HistoricoTelaState extends State<HistoricoTela> {
-  late List<Map<String, dynamic>> _transacoesFiltradas;
-  String _filtroAtivo = 'Todos';
+class DashboardScreenState extends State<DashboardScreen> {
+  static const String _baseUrl =
+      'https://us-central1-nossas-contas-app-c432d.cloudfunctions.net/api';
+
+  List<Map<String, dynamic>> _transacoes = [];
+  bool _carregando = true;
+  String? _erro;
 
   @override
   void initState() {
     super.initState();
-    _transacoesFiltradas = List.from(widget.todasTransacoes);
+    reload();
   }
-  
-  @override
-  void didUpdateWidget(covariant HistoricoTela oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.todasTransacoes != oldWidget.todasTransacoes) {
-      _aplicarFiltro(_filtroAtivo);
+
+  Future<void> reload() async {
+    setState(() {
+      _carregando = true;
+      _erro = null;
+    });
+
+    try {
+      final response = await http.get(Uri.parse("$_baseUrl/transacoes"));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+
+        setState(() {
+          _transacoes = data.map((t) {
+            return {
+              'id': t['id'],
+              'descricao': t['descricao'],
+              'valor': (t['valor'] as num).toDouble(),
+              'tipo': t['tipo'],
+              'categoria': t['categoria'],
+            };
+          }).toList();
+
+          _carregando = false;
+        });
+      } else {
+        setState(() {
+          _erro = 'Erro ao carregar (${response.statusCode})';
+          _carregando = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _erro = 'Erro ao carregar transações.';
+        _carregando = false;
+      });
     }
   }
 
-  void _aplicarFiltro(String filtro) {
-    setState(() {
-      _filtroAtivo = filtro;
-      if (filtro == 'Receitas') {
-        _transacoesFiltradas = widget.todasTransacoes.where((t) => t['tipo'] == 'Receita').toList();
-      } else if (filtro == 'Despesas') {
-        _transacoesFiltradas = widget.todasTransacoes.where((t) => t['tipo'] == 'Despesa').toList();
-      } else {
-        _transacoesFiltradas = List.from(widget.todasTransacoes);
+  Map<String, double> get gastosPorCategoria {
+    final Map<String, double> dados = {};
+    for (var t in _transacoes) {
+      if (t['tipo'] == 'Despesa') {
+        final categoria = t['categoria'];
+        final valor = t['valor'] as double;
+        dados.update(categoria, (v) => v + valor.abs(),
+            ifAbsent: () => valor.abs());
       }
-    });
+    }
+    return dados;
   }
 
   @override
   Widget build(BuildContext context) {
+    final double saldoTotal =
+        _transacoes.fold(0.0, (sum, item) => sum + (item['valor'] as double));
+
+    final dadosGrafico = gastosPorCategoria;
+    final totalGastos = dadosGrafico.values.fold(0.0, (a, b) => a + b);
+
     return Scaffold(
-      // --- APP BAR CORRIGIDA ---
       appBar: AppBar(
-        backgroundColor: Colors.white, 
-        elevation: 0, 
-        title: Image.asset(
-          'assets/logo_splash.png',
-          height: 32,
-        ),
-        systemOverlayStyle: const SystemUiOverlayStyle(
-          statusBarIconBrightness: Brightness.dark,
-          statusBarBrightness: Brightness.light,
-        ),
-        iconTheme: const IconThemeData(
-          color: Colors.black54, 
-        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Image.asset('assets/logo_splash.png', height: 32),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: _carregando
+          ? const Center(child: CircularProgressIndicator())
+          : _erro != null
+              ? Center(child: Text(_erro!))
+              : _buildDashboard(saldoTotal, dadosGrafico, totalGastos),
+    );
+  }
+
+  Widget _buildDashboard(
+      double saldoTotal, Map<String, double> dadosGrafico, double totalGastos) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _buildSaldoCard(saldoTotal),
+        const SizedBox(height: 32),
+        _buildPieChart(dadosGrafico, totalGastos),
+        const SizedBox(height: 30),
+        _buildLegenda(dadosGrafico),
+        const SizedBox(height: 32),
+        const Text(
+          'Transações Recentes',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
+        _buildTransacoesList(),
+      ],
+    );
+  }
+
+  Widget _buildSaldoCard(double saldoTotal) {
+    return Card(
+      elevation: 4,
+      child: Container(
+        padding: const EdgeInsets.all(20),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                FilterChip(label: const Text('Todos'), selected: _filtroAtivo == 'Todos', onSelected: (_) => _aplicarFiltro('Todos')),
-                FilterChip(label: const Text('Receitas'), selected: _filtroAtivo == 'Receitas', onSelected: (_) => _aplicarFiltro('Receitas')),
-                FilterChip(label: const Text('Despesas'), selected: _filtroAtivo == 'Despesas', onSelected: (_) => _aplicarFiltro('Despesas')),
-              ],
-            ),
-            const Divider(),
-            Expanded(
-              child: _transacoesFiltradas.isEmpty
-                  ? const Center(child: Text('Nenhuma transação encontrada.'))
-                  : ListView.builder(
-                      itemCount: _transacoesFiltradas.length,
-                      itemBuilder: (context, index) {
-                        final transacao = _transacoesFiltradas[index];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 8.0),
-                          child: ListTile(
-                            leading: Icon(
-                              transacao['tipo'] == 'Receita' ? Icons.arrow_upward : Icons.arrow_downward,
-                              color: transacao['tipo'] == 'Receita' ? Colors.green : Colors.red,
-                            ),
-                            title: Text(transacao['descricao'] as String? ?? ''),
-                            subtitle: Text(transacao['categoria'] as String? ?? ''),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'R\$ ${(transacao['valor'] as double).abs().toStringAsFixed(2)}',
-                                  style: TextStyle(
-                                    color: transacao['tipo'] == 'Receita' ? Colors.green : Colors.red,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                IconButton(
-                                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                                  onPressed: () {
-                                    widget.onExcluir(transacao);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('${transacao['descricao']} excluído(a).')),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+            const Text('Saldo Atual',
+                style: TextStyle(fontSize: 18, color: Colors.grey)),
+            const SizedBox(height: 8),
+            Text(
+              'R\$ ${saldoTotal.toStringAsFixed(2)}',
+              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildPieChart(Map<String, double> dados, double totalGastos) {
+    return SizedBox(
+      height: 250,
+      child: PieChart(
+        PieChartData(
+          sectionsSpace: 2.0,
+          centerSpaceRadius: 40.0,
+          sections: dados.entries.map((entry) {
+            final percentual = totalGastos > 0
+                ? (entry.value / totalGastos) * 100
+                : 0.0;
+
+            return PieChartSectionData(
+              color: Colors.primaries[
+                  dados.keys.toList().indexOf(entry.key) %
+                      Colors.primaries.length],
+              value: entry.value,
+              title: '${percentual.toStringAsFixed(1)}%',
+              radius: 80.0,
+              titleStyle: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLegenda(Map<String, double> dados) {
+    return Wrap(
+      spacing: 16,
+      runSpacing: 8,
+      children: dados.keys.map((categoria) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              color: Colors.primaries[
+                  dados.keys.toList().indexOf(categoria) %
+                      Colors.primaries.length],
+            ),
+            const SizedBox(width: 6),
+            Text(categoria),
+          ],
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildTransacoesList() {
+    return Column(
+      children: _transacoes.map((t) {
+        final valor = t['valor'] as double;
+        final tipo = t['tipo'];
+
+        return Card(
+          child: ListTile(
+            leading: Icon(
+              tipo == 'Receita' ? Icons.arrow_upward : Icons.arrow_downward,
+              color: tipo == 'Receita' ? Colors.green : Colors.red,
+            ),
+            title: Text(t['descricao']),
+            subtitle: Text(t['categoria']),
+            trailing: Text(
+              'R\$ ${valor.abs().toStringAsFixed(2)}',
+              style: TextStyle(
+                  color: tipo == 'Receita' ? Colors.green : Colors.red,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

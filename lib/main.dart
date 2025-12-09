@@ -1,22 +1,31 @@
 import 'package:flutter/material.dart';
-import 'navegador_principal.dart'; 
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart'; 
+import 'navegador_principal.dart';
 
-void main() {
-  runApp(const GranaFacilApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(const NossasContasApp());
 }
 
-class GranaFacilApp extends StatelessWidget {
-  const GranaFacilApp({super.key});
+
+class NossasContasApp extends StatelessWidget {
+  const NossasContasApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'GranaFácil',
+      title: 'NossasContas',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const MainNavigator(), 
+      home: const MainNavigator(),
       debugShowCheckedModeBanner: false,
     );
   }
